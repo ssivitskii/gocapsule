@@ -3,6 +3,7 @@ package capsule
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -242,6 +243,21 @@ func TestCollectionEnforcesSharedUncompressedBudget(t *testing.T) {
 	}
 	if len(entries) != 0 {
 		t.Fatalf("collection failure left files: %v", entries)
+	}
+}
+
+func TestCollectMetricsAllowsExplicitEmptySelection(t *testing.T) {
+	recorder := &Recorder{cfg: Config{Metrics: []string{}}}
+	data, err := recorder.collectMetrics(1 << 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document metricsDocument
+	if err := json.Unmarshal(data, &document); err != nil {
+		t.Fatal(err)
+	}
+	if document.Schema != metricsSchema || document.Version != metricsVersion || len(document.Values) != 0 {
+		t.Fatalf("unexpected empty metrics document: %+v", document)
 	}
 }
 

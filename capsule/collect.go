@@ -99,7 +99,10 @@ func (r *Recorder) collectMetrics(limit int64) ([]byte, error) {
 	for i, name := range r.cfg.Metrics {
 		samples[i].Name = name
 	}
-	metrics.Read(samples)
+	// Go 1.25's runtime/metrics.Read panics for an empty sample slice.
+	if len(samples) > 0 {
+		metrics.Read(samples)
+	}
 	doc := metricsDocument{Schema: metricsSchema, Version: metricsVersion, Values: make([]metricValue, 0, len(samples))}
 	for _, sample := range samples {
 		value := metricValue{Name: sample.Name}

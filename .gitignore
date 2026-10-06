@@ -1,0 +1,4 @@
+*.tar.gz
+.gocapsule-*.tmp
+gocapsules/
+bin/
